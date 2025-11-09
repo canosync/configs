@@ -1,64 +1,106 @@
-﻿local Players = game:GetService("Players")
+local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local TextService = game:GetService("TextService")
 local TextChatService = game:GetService("TextChatService")
+local HttpService = game:GetService("HttpService")
+
+local JSON_URL = "https://raw.githubusercontent.com/canosync/configs/main/nametags.json" 
+local UPDATE_INTERVAL = 60 
 
 local TELEPORT_CONFIG = { DISTANCE = 5, HEIGHT = 0.5 }
 
-local Styles = {
-  AK = {
-    Ranks = {
-      ["AK OWNER"] = {
-        users = {}, primary = Color3.fromRGB(20, 20, 20), GlitchName = true,
-        accent = ColorSequence.new{ ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 128, 128)), ColorSequenceKeypoint.new(1, Color3.fromRGB(180, 255, 230)) },
-        emoji = "👑", image = ""
-      }
-    },
-    Config = {
-      TAG_SIZE = UDim2.new(0, 0, 0, 32), TAG_OFFSET = Vector3.new(0, 2.5, 0), MAX_DISTANCE = 200000,
-      DISTANCE_THRESHOLD = 50, HYSTERESIS = 5, CORNER_RADIUS = UDim.new(0, 10),
-      PARTICLE_COUNT = 100, PARTICLE_SPEED = 1, MINI_OFFSET = Vector3.new(0, 2.0, 0)
-    }
-  },
-  DC = {
-    Ranks = {
-      ["AK OWNER"] = {
-        users = {"xcanobae", "Phibi"}, primary = Color3.fromRGB(30, 31, 34), accent = Color3.fromRGB(250, 166, 26),
-        nameplateImage = "rbxassetid://104260777190687", aspectRatio = 4.5, profileFrame = "rbxassetid://99476252618929",
-        profileDecoration = "rbxassetid://128640287934877", statusIcon = "rbxassetid://109657483570183"
-      },
-      ["SYNC USER"] = {
-        users = {}, primary = Color3.fromRGB(30, 31, 34), accent = Color3.fromRGB(88, 101, 242),
-        nameplateImage = "rbxassetid://104260777190687", aspectRatio = 4.0, profileFrame = "",
-        profileDecoration = "rbxassetid://119461307952420", statusIcon = "rbxassetid://137693122197794"
-      }
-    },
-    Config = {
-      TAG_HEIGHT = 50, TAG_OFFSET = Vector3.new(0, 2.7, 0), MINI_OFFSET = Vector3.new(0, 2.5, 0),
-      MAX_DISTANCE = 200, DISTANCE_THRESHOLD = 15, HYSTERESIS = 5, CORNER_RADIUS = UDim.new(0, 8),
-      WIDTH_MULTIPLIER = 1.15
-    }
-  },
-  PH = {
-    Ranks = {
-      ["emre-lean"] = {
-        users = {"xcanobae", "Phibi"}, name1 = "emre", name2 = "lean"
-      },
-      ["your-name"] = {
-        users = {"pashaprada8"}, name1 = "Your", name2 = "Name"
-      }
-    },
-    Config = {
-      TAG_HEIGHT = 40, MINI_WIDTH = 50, MINI_HEIGHT = 55, 
-      TAG_OFFSET = Vector3.new(0, 3.0, 0), MINI_OFFSET = Vector3.new(0, 2.8, 0), 
-      MAX_DISTANCE = 200, DISTANCE_THRESHOLD = 15, HYSTERESIS = 5, 
-      ANIMATION_SPEED = 0.4, ANIMATION_EASING = Enum.EasingStyle.Quart,
-    }
-  }
-}
+local Styles = {}
+local currentConfigJson = ""
+local ChatWhitelist = {}; 
+local playerToTagInfo = {}
 
-local ChatWhitelist = {}; local playerToTagInfo = {}
-for styleName, styleData in pairs(Styles) do for rankName, rankData in pairs(styleData.Ranks) do if rankData.users then for _, username in ipairs(rankData.users) do playerToTagInfo[username:lower()] = {style = styleName, rank = rankName} end end end end
+local function processConfiguration(config)
+    local processedStyles = {}
+    for styleName, styleData in pairs(config) do
+        local newStyleData = { Ranks = {}, Config = {} }
+        for rankName, rankData in pairs(styleData.Ranks) do
+            local newRankData = {}
+            for key, value in pairs(rankData) do newRankData[key] = value end
+            if newRankData.primary then newRankData.primary = Color3.fromRGB(unpack(newRankData.primary)) end
+            if newRankData.accent then
+                if newRankData.accentIsSequence then
+                    local keypoints = {}
+                    for _, kp in ipairs(newRankData.accent) do
+                        table.insert(keypoints, ColorSequenceKeypoint.new(kp.time, Color3.fromRGB(unpack(kp.color))))
+                    end
+                    newRankData.accent = ColorSequence.new(keypoints)
+                else
+                    newRankData.accent = Color3.fromRGB(unpack(newRankData.accent))
+                end
+            end
+            newStyleData.Ranks[rankName] = newRankData
+        end
+        for key, value in pairs(styleData.Config) do
+            local newValue = value
+            if key == "TAG_OFFSET" or key == "MINI_OFFSET" then newValue = Vector3.new(unpack(value))
+            elseif key == "CORNER_RADIUS" then newValue = UDim.new(unpack(value))
+            elseif key == "TAG_SIZE" then newValue = UDim2.new(unpack(value))
+            elseif key == "ANIMATION_EASING" then newValue = Enum.EasingStyle.Quart end
+            newStyleData.Config[key] = newValue
+        end
+        processedStyles[styleName] = newStyleData
+    end
+    return processedStyles
+end
+
+local function applyPlayerTag(player)
+    if not player or not player.Character then return end
+    local tagInfo = playerToTagInfo[player.Name:lower()] or (ChatWhitelist[player.Name:lower()] and {style = "DC", rank = "SYNC USER"})
+    if tagInfo then
+        local styleData = Styles[tagInfo.style]; local rankData = styleData and styleData.Ranks[tagInfo.rank]
+        if rankData and player.Character then
+            local head = player.Character:FindFirstChild("Head")
+            if head then
+                for _, gui in ipairs(Players.LocalPlayer.PlayerGui:GetChildren()) do if gui:IsA("BillboardGui") and gui.Name == "RankTag" and gui.Adornee == head then gui:Destroy() end end
+                if tagInfo.style == "DC" then createDcTag(player.Character, player, tagInfo.rank, rankData, styleData.Config)
+                elseif tagInfo.style == "AK" then createAkTag(player.Character, player, tagInfo.rank, rankData, styleData.Config)
+                elseif tagInfo.style == "PH" then createPhTag(player.Character, player, tagInfo.rank, rankData, styleData.Config)
+                end
+            end
+        end
+    end
+end
+
+local function updateConfiguration()
+    local success, response = pcall(HttpService.GetAsync, HttpService, JSON_URL, true)
+    if not success then
+        warn("WARNING: Could not fetch nametag configuration from URL.")
+        return
+    end
+
+    if response == currentConfigJson then return end 
+    
+    currentConfigJson = response
+    local decodeSuccess, fetchedConfig = pcall(HttpService.JSONDecode, HttpService, response)
+    
+    if not decodeSuccess then
+        warn("WARNING: Failed to decode JSON from URL.")
+        return
+    end
+
+    Styles = processConfiguration(fetchedConfig)
+    
+    playerToTagInfo = {}
+    for styleName, styleData in pairs(Styles) do
+        for rankName, rankData in pairs(styleData.Ranks) do
+            if rankData.users then
+                for _, username in ipairs(rankData.users) do
+                    playerToTagInfo[username:lower()] = {style = styleName, rank = rankName}
+                end
+            end
+        end
+    end
+
+    print("Nametag configuration updated. Re-applying all tags...")
+    for _, player in ipairs(Players:GetPlayers()) do
+        applyPlayerTag(player)
+    end
+end
 
 local function teleportToPlayer(targetPlayer)
   local localPlayer = Players.LocalPlayer; local character = localPlayer.Character; local targetCharacter = targetPlayer.Character; if not (character and targetCharacter) then return end; local hrp = character:FindFirstChild("HumanoidRootPart"); local targetHRP = targetCharacter:FindFirstChild("UpperTorso") or targetCharacter:FindFirstChild("HumanoidRootPart"); if not (hrp and targetHRP) then return end; local targetCFrame = targetHRP.CFrame; local teleportPosition = targetCFrame.Position - (targetCFrame.LookVector * TELEPORT_CONFIG.DISTANCE) + Vector3.new(0, TELEPORT_CONFIG.HEIGHT, 0); local function createParticles(position) local part = Instance.new("Part", workspace); part.Transparency = 1; part.Anchored = true; part.CanCollide = false; part.Position = position; local emitter = Instance.new("ParticleEmitter", part); emitter.Texture = "http://www.roblox.com/asset/?id=89296104222585"; emitter.Size = NumberSequence.new(4); emitter.Lifetime = NumberRange.new(0.15, 0.15); emitter.Rate = 100; emitter.TimeScale = 0.25; game.Debris:AddItem(part, 2) end; createParticles(hrp.Position); createParticles(teleportPosition); local fadeTime = 0.1; local tweenInfo = TweenInfo.new(fadeTime, Enum.EasingStyle.Quad, Enum.EasingDirection.Out); local characterParts = {}; for _, part in ipairs(character:GetDescendants()) do if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then table.insert(characterParts, part); TweenService:Create(part, tweenInfo, {Transparency = 1}):Play() end end; task.wait(fadeTime); hrp.CFrame = CFrame.new(teleportPosition, targetHRP.Position); local sound = Instance.new("Sound", hrp); sound.SoundId = "rbxassetid://5066021887"; sound.Volume = 0.5; sound:Play(); game.Debris:AddItem(sound, 2); for _, part in ipairs(characterParts) do if part and part.Parent then TweenService:Create(part, tweenInfo, {Transparency = 0}):Play() end end
@@ -102,8 +144,7 @@ end
 local function createDcTag(character, player, rankName, rankData, styleConfig)
     local head = character and character:FindFirstChild("Head"); if not head then return end
     local tag = Instance.new("BillboardGui", Players.LocalPlayer.PlayerGui); tag.Name = "RankTag"; tag.Adornee = head; tag.MaxDistance = styleConfig.MAX_DISTANCE; tag.LightInfluence = 0; tag.ResetOnSpawn = false
-    tag.Active = true
-    tag.AlwaysOnTop = true
+    tag.Active = true; tag.AlwaysOnTop = true
 
     local mainFrame = Instance.new("TextButton", tag); mainFrame.Name = "MainFrame"; mainFrame.BackgroundColor3 = rankData.primary or Color3.fromRGB(30, 31, 34); mainFrame.ClipsDescendants = true; mainFrame.Size = UDim2.new(1,0,1,0); mainFrame.Text = ""; mainFrame.AutoButtonColor = false
     if player ~= Players.LocalPlayer then mainFrame.MouseButton1Click:Connect(function() teleportToPlayer(player) end) end
@@ -134,8 +175,7 @@ local function createPhTag(character, player, rankName, rankData, styleConfig)
     local head = character:FindFirstChild("Head"); if not head then return end
     if character:FindFirstChildOfClass("Humanoid") then character.Humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None end
     local tag = Instance.new("BillboardGui", Players.LocalPlayer.PlayerGui); tag.Name = "RankTag"; tag.Adornee = head; tag.MaxDistance = styleConfig.MAX_DISTANCE; tag.LightInfluence = 0; tag.ResetOnSpawn = false
-    tag.Active = true
-    tag.AlwaysOnTop = true
+    tag.Active = true; tag.AlwaysOnTop = true
 
     local mainFrame = Instance.new("TextButton", tag); mainFrame.BackgroundColor3 = Color3.fromRGB(18, 18, 18); mainFrame.Size = UDim2.new(1,0,1,0); mainFrame.Text = ""; mainFrame.AutoButtonColor = false
     if player ~= Players.LocalPlayer then mainFrame.MouseButton1Click:Connect(function() teleportToPlayer(player) end) end
@@ -158,23 +198,13 @@ local function createPhTag(character, player, rankName, rankData, styleConfig)
     task.spawn(function() while active do local lPC = Players.LocalPlayer and Players.LocalPlayer.Character; if lPC and head.Parent then local dist = (lPC.Head.Position - head.Position).Magnitude; if dist > (styleConfig.DISTANCE_THRESHOLD + styleConfig.HYSTERESIS) and not isMinimized then isMinimized = true; TweenService:Create(tag, tweenInfo, {Size = miniState.TagSize, StudsOffset = styleConfig.MINI_OFFSET}):Play(); TweenService:Create(mainCorner, tweenInfo, {CornerRadius = miniState.FrameCorner}):Play(); TweenService:Create(n1L, tweenInfo, {Position = miniState.n1P, Size = miniState.n1S, TextSize = miniState.n1TS}):Play(); TweenService:Create(n2F, tweenInfo, {Position = miniState.n2P, Size = miniState.n2FS}):Play(); TweenService:Create(n2L, tweenInfo, {TextSize = miniState.n2TS}):Play() elseif dist < (styleConfig.DISTANCE_THRESHOLD - styleConfig.HYSTERESIS) and isMinimized then isMinimized = false; TweenService:Create(tag, tweenInfo, {Size = normalState.TagSize, StudsOffset = styleConfig.TAG_OFFSET}):Play(); TweenService:Create(mainCorner, tweenInfo, {CornerRadius = normalState.FrameCorner}):Play(); TweenService:Create(n1L, tweenInfo, {Position = normalState.n1P, Size = normalState.n1S, TextSize = normalState.n1TS}):Play(); TweenService:Create(n2F, tweenInfo, {Position = normalState.n2P, Size = normalState.n2FS}):Play(); TweenService:Create(n2L, tweenInfo, {TextSize = normalState.n2TS}):Play() end else active = false end; task.wait(0.2) end end)
 end
 
-local function applyPlayerTag(player)
-    if not player or not player.Character then return end
-    local tagInfo = playerToTagInfo[player.Name:lower()] or (ChatWhitelist[player.Name:lower()] and {style = "DC", rank = "SYNC USER"})
-    if tagInfo then
-        local styleData = Styles[tagInfo.style]; local rankData = styleData and styleData.Ranks[tagInfo.rank]
-        if rankData and player.Character then
-            local head = player.Character:FindFirstChild("Head")
-            if head then
-                for _, gui in ipairs(Players.LocalPlayer.PlayerGui:GetChildren()) do if gui:IsA("BillboardGui") and gui.Name == "RankTag" and gui.Adornee == head then gui:Destroy() end end
-                if tagInfo.style == "DC" then createDcTag(player.Character, player, tagInfo.rank, rankData, styleData.Config)
-                elseif tagInfo.style == "AK" then createAkTag(player.Character, player, tagInfo.rank, rankData, styleData.Config)
-                elseif tagInfo.style == "PH" then createPhTag(player.Character, player, tagInfo.rank, rankData, styleData.Config)
-                end
-            end
-        end
+updateConfiguration()
+
+task.spawn(function()
+    while task.wait(UPDATE_INTERVAL) do
+        updateConfiguration()
     end
-end
+end)
 
 local playerConnections = {}
 local function setupPlayer(player)
