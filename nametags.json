@@ -1,0 +1,88 @@
+{
+  "AK": {
+    "Ranks": {
+      "AK OWNER": {
+        "users": [],
+        "primary": [20, 20, 20],
+        "GlitchName": true,
+        "accentIsSequence": true,
+        "accent": [
+          {"time": 0, "color": [0, 128, 128]},
+          {"time": 1, "color": [180, 255, 230]}
+        ],
+        "emoji": "👑",
+        "image": ""
+      }
+    },
+    "Config": {
+      "TAG_SIZE": [0, 0, 0, 32],
+      "TAG_OFFSET": [0, 2.5, 0],
+      "MAX_DISTANCE": 200000,
+      "DISTANCE_THRESHOLD": 50,
+      "HYSTERESIS": 5,
+      "CORNER_RADIUS": [0, 10],
+      "PARTICLE_COUNT": 100,
+      "PARTICLE_SPEED": 1,
+      "MINI_OFFSET": [0, 2.0, 0]
+    }
+  },
+  "DC": {
+    "Ranks": {
+      "AK OWNER": {
+        "users": ["xcanobae", "Phibi"],
+        "primary": [30, 31, 34],
+        "accent": [250, 166, 26],
+        "nameplateImage": "rbxassetid://104260777190687",
+        "aspectRatio": 4.5,
+        "profileFrame": "rbxassetid://99476252618929",
+        "profileDecoration": "rbxassetid://128640287934877",
+        "statusIcon": "rbxassetid://109657483570183"
+      },
+      "SYNC USER": {
+        "users": [],
+        "primary": [30, 31, 34],
+        "accent": [88, 101, 242],
+        "nameplateImage": "rbxassetid://104260777190687",
+        "aspectRatio": 4,
+        "profileFrame": "",
+        "profileDecoration": "rbxassetid://119461307952420",
+        "statusIcon": "rbxassetid://137693122197794"
+      }
+    },
+    "Config": {
+      "TAG_HEIGHT": 50,
+      "TAG_OFFSET": [0, 2.7, 0],
+      "MINI_OFFSET": [0, 2.5, 0],
+      "MAX_DISTANCE": 200,
+      "DISTANCE_THRESHOLD": 15,
+      "HYSTERESIS": 5,
+      "CORNER_RADIUS": [0, 8],
+      "WIDTH_MULTIPLIER": 1.15
+    }
+  },
+  "PH": {
+    "Ranks": {
+      "emre-lean": {
+        "users": ["xcanobae", "Phibi"],
+        "name1": "emre",
+        "name2": "lean"
+      },
+      "your-name": {
+        "users": ["pashaprada8"],
+        "name1": "Your",
+        "name2": "Name"
+      }
+    },
+    "Config": {
+      "TAG_HEIGHT": 40,
+      "MINI_WIDTH": 50,
+      "MINI_HEIGHT": 55,
+      "TAG_OFFSET": [0, 3.0, 0],
+      "MINI_OFFSET": [0, 2.8, 0],
+      "MAX_DISTANCE": 200,
+      "DISTANCE_THRESHOLD": 15,
+      "HYSTERESIS": 5,
+      "ANIMATION_SPEED": 0.4
+    }
+  }
+}
