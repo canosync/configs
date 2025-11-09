@@ -15,9 +15,12 @@ local Styles = {
       }
     },
     Config = {
-      TAG_SIZE = UDim2.new(0, 0, 0, 32), TAG_OFFSET = Vector3.new(0, 2.5, 0), MAX_DISTANCE = 200000,
+      TAG_SIZE = UDim2.new(0, 0, 0, 32), 
+      TAG_OFFSET = Vector3.new(0, 2.2, 0), 
+      MAX_DISTANCE = 200000,
       DISTANCE_THRESHOLD = 50, HYSTERESIS = 5, CORNER_RADIUS = UDim.new(0, 10),
-      PARTICLE_COUNT = 100, PARTICLE_SPEED = 1, MINI_OFFSET = Vector3.new(0, 2.0, 0)
+      PARTICLE_COUNT = 100, PARTICLE_SPEED = 1, 
+      MINI_OFFSET = Vector3.new(0, 1.7, 0)
     }
   },
   DC = {
@@ -34,7 +37,9 @@ local Styles = {
       }
     },
     Config = {
-      TAG_HEIGHT = 50, TAG_OFFSET = Vector3.new(0, 2.7, 0), MINI_OFFSET = Vector3.new(0, 2.5, 0),
+      TAG_HEIGHT = 50, 
+      TAG_OFFSET = Vector3.new(0, 2.4, 0), 
+      MINI_OFFSET = Vector3.new(0, 2.2, 0),
       MAX_DISTANCE = 200, DISTANCE_THRESHOLD = 15, HYSTERESIS = 5, CORNER_RADIUS = UDim.new(0, 8),
       WIDTH_MULTIPLIER = 1.15
     }
@@ -50,7 +55,8 @@ local Styles = {
     },
     Config = {
       TAG_HEIGHT = 40, MINI_WIDTH = 50, MINI_HEIGHT = 55, 
-      TAG_OFFSET = Vector3.new(0, 3.0, 0), MINI_OFFSET = Vector3.new(0, 2.8, 0), 
+      TAG_OFFSET = Vector3.new(0, 2.7, 0), 
+      MINI_OFFSET = Vector3.new(0, 2.5, 0), 
       MAX_DISTANCE = 200, DISTANCE_THRESHOLD = 15, HYSTERESIS = 5, 
       ANIMATION_SPEED = 0.4, ANIMATION_EASING = Enum.EasingStyle.Quart,
     }
@@ -193,3 +199,4 @@ if localPlayer and not playerToTagInfo[localPlayer.Name:lower()] then
     task.spawn(applyPlayerTag, localPlayer)
     pcall(function() if TextChatService and TextChatService.TextChannels:FindFirstChild("RBXGeneral") then TextChatService.TextChannels.RBXGeneral:SendAsync("     ") end end)
 end
+
