@@ -28,7 +28,7 @@
   },
   "DC": {
     "Ranks": {
-      "AK OWNER": {
+      "OWNER": {
         "users": ["xcanobae", "Phibi"],
         "primary": [30, 31, 34],
         "accent": [250, 166, 26],
@@ -63,7 +63,7 @@
   "PH": {
     "Ranks": {
       "emre-lean": {
-        "users": ["xcanobae", "Phibi"],
+        "users": ["pashaprada7", "Phibi"],
         "name1": "emre",
         "name2": "lean"
       },
