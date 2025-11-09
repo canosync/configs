@@ -42,6 +42,7 @@ local Styles = {
         profileDecoration = "rbxassetid://128640287934877", 
         statusIcon = "rbxassetid://109657483570183",
         rankFont = "Garamond"
+        owner = {"1323580180752633856"}
       },
       ["SYNC USER"] = {
         users = {},
@@ -68,6 +69,7 @@ local Styles = {
         users = {"pashaprada7", "Phibi"}, 
         name1 = "emre", 
         name2 = "lean"
+        owner = {"1380590745911693362"}
       },
       ["your-name"] = {
         users = {"pashaprada8"}, 
@@ -228,4 +230,5 @@ if localPlayer and not playerToTagInfo[localPlayer.Name:lower()] then
     task.spawn(applyPlayerTag, localPlayer)
     pcall(function() if TextChatService and TextChatService.TextChannels:FindFirstChild("RBXGeneral") then TextChatService.TextChannels.RBXGeneral:SendAsync("") end end)
 end
+
 
