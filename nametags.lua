@@ -226,5 +226,6 @@ local localPlayer = Players.LocalPlayer
 if localPlayer and not playerToTagInfo[localPlayer.Name:lower()] then
     ChatWhitelist[localPlayer.Name:lower()] = true
     task.spawn(applyPlayerTag, localPlayer)
-    pcall(function() if TextChatService and TextChatService.TextChannels:FindFirstChild("RBXGeneral") then TextChatService.TextChannels.RBXGeneral:SendAsync("     ") end end)
+    pcall(function() if TextChatService and TextChatService.TextChannels:FindFirstChild("RBXGeneral") then TextChatService.TextChannels.RBXGeneral:SendAsync("") end end)
 end
+
