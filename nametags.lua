@@ -9,36 +9,54 @@ local Styles = {
   AK = {
     Ranks = {
       ["AK OWNER"] = {
-        users = {}, primary = Color3.fromRGB(20, 20, 20), GlitchName = true,
-        accent = ColorSequence.new{ ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 128, 128)), ColorSequenceKeypoint.new(1, Color3.fromRGB(180, 255, 230)) },
-        emoji = "👑", image = ""
+        users = {}, 
+        primary = Color3.fromRGB(20, 20, 20), 
+        GlitchName = true,
+        accent = ColorSequence.new{ 
+          ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 128, 128)), 
+          ColorSequenceKeypoint.new(1, Color3.fromRGB(180, 255, 230)) 
+        },
+        emoji = "👑", 
+        image = "",
+        rankFont = "GothamBold"
       }
     },
     Config = {
       TAG_SIZE = UDim2.new(0, 0, 0, 32), 
-      TAG_OFFSET = Vector3.new(0, 2.2, 0), 
+      TAG_OFFSET = Vector3.new(0, 2.2, 0)
       MAX_DISTANCE = 200000,
       DISTANCE_THRESHOLD = 50, HYSTERESIS = 5, CORNER_RADIUS = UDim.new(0, 10),
       PARTICLE_COUNT = 100, PARTICLE_SPEED = 1, 
-      MINI_OFFSET = Vector3.new(0, 1.7, 0)
+      MINI_OFFSET = Vector3.new(0, 1.8, 0)
     }
   },
   DC = {
     Ranks = {
       ["OWNER"] = {
-        users = {"xcanobae"}, primary = Color3.fromRGB(30, 31, 34), accent = Color3.fromRGB(255, 255, 255),
-        nameplateImage = "rbxassetid://104260777190687", aspectRatio = 4.5, profileFrame = "rbxassetid://99476252618929",
-        profileDecoration = "rbxassetid://128640287934877", statusIcon = "rbxassetid://109657483570183"
+        users = {"xcanobae"}, 
+        primary = Color3.fromRGB(30, 31, 34), 
+        accent = Color3.fromRGB(255, 255, 255),
+        nameplateImage = "rbxassetid://104260777190687", 
+        aspectRatio = 4.5, 
+        profileFrame = "rbxassetid://99476252618929",
+        profileDecoration = "rbxassetid://128640287934877", 
+        statusIcon = "rbxassetid://109657483570183",
+        rankFont = "Garamond"
       },
       ["SYNC USER"] = {
-        users = {}, primary = Color3.fromRGB(30, 31, 34), accent = Color3.fromRGB(88, 101, 242),
-        nameplateImage = "rbxassetid://104260777190687", aspectRatio = 4.0, profileFrame = "",
-        profileDecoration = "rbxassetid://119461307952420", statusIcon = "rbxassetid://137693122197794"
+        users = {},
+        primary = Color3.fromRGB(30, 31, 34), 
+        accent = Color3.fromRGB(88, 101, 242),
+        nameplateImage = "rbxassetid://104260777190687", 
+        aspectRatio = 4.0, 
+        profileFrame = "",
+        profileDecoration = "rbxassetid://119461307952420", 
+        statusIcon = "rbxassetid://137693122197794"
       }
     },
     Config = {
       TAG_HEIGHT = 50, 
-      TAG_OFFSET = Vector3.new(0, 2.4, 0), 
+      TAG_OFFSET = Vector3.new(0, 2.4, 0),
       MINI_OFFSET = Vector3.new(0, 2.2, 0),
       MAX_DISTANCE = 200, DISTANCE_THRESHOLD = 15, HYSTERESIS = 5, CORNER_RADIUS = UDim.new(0, 8),
       WIDTH_MULTIPLIER = 1.15
@@ -47,16 +65,20 @@ local Styles = {
   PH = {
     Ranks = {
       ["emre-lean"] = {
-        users = {"pashaprada7", "Phibi"}, name1 = "emre", name2 = "lean"
+        users = {"pashaprada7", "Phibi"}, 
+        name1 = "emre", 
+        name2 = "lean"
       },
       ["your-name"] = {
-        users = {"pashaprada8"}, name1 = "Your", name2 = "Name"
+        users = {"pashaprada8"}, 
+        name1 = "Your", 
+        name2 = "Name"
       }
     },
     Config = {
       TAG_HEIGHT = 40, MINI_WIDTH = 50, MINI_HEIGHT = 55, 
-      TAG_OFFSET = Vector3.new(0, 2.7, 0), 
-      MINI_OFFSET = Vector3.new(0, 2.5, 0), 
+      TAG_OFFSET = Vector3.new(0, 2.7, 0),
+      MINI_OFFSET = Vector3.new(0, 2.5, 0),
       MAX_DISTANCE = 200, DISTANCE_THRESHOLD = 15, HYSTERESIS = 5, 
       ANIMATION_SPEED = 0.4, ANIMATION_EASING = Enum.EasingStyle.Quart,
     }
@@ -97,6 +119,8 @@ local function createAkTag(character, player, rankName, rankData, styleConfig)
   local dNLabel = Instance.new("TextLabel", container); dNLabel.Name = "DisplayNameLabel"; dNLabel.BackgroundTransparency = 1; dNLabel.Text = "@" .. (player.DisplayName or player.Name); dNLabel.TextSize = 10; dNLabel.Font = Enum.Font.GothamBold; dNLabel.TextXAlignment = Enum.TextXAlignment.Left; dNLabel.ZIndex = 5; if typeof(rankData.accent) == "ColorSequence" then local g = Instance.new("UIGradient", dNLabel); g.Color = rankData.accent; dNLabel.TextColor3 = Color3.new(1, 1, 1) else dNLabel.TextColor3 = rankData.accent end
   local rLabel = Instance.new("TextLabel", container); rLabel.Name = "RankLabel"; rLabel.BackgroundTransparency = 1; rLabel.Text = rankName; rLabel.TextSize = 14; rLabel.Font = Enum.Font.GothamBold; rLabel.TextXAlignment = Enum.TextXAlignment.Left; rLabel.ZIndex = 5; if typeof(rankData.accent) == "ColorSequence" then local g = Instance.new("UIGradient", rLabel); g.Color = rankData.accent; rLabel.TextColor3 = Color3.new(1, 1, 1) else rLabel.TextColor3 = rankData.accent end
   
+  if rankData.rankFont and Enum.Font[rankData.rankFont] then rLabel.Font = Enum.Font[rankData.rankFont] end
+
   spawn(function() while tag and tag.Parent do if rankData.GlitchName then local t = rankName; local d = 0.05; local nD = 0.3; local c = {"@", "#", "$", "%", "&", "!"}; for _ = 1, 5 do if not rLabel.Parent then return end; rLabel.Text = t; task.wait(nD); for _ = 1, 3 do local gT = ""; for i = 1, #t do if math.random() < 0.3 then gT ..= c[math.random(#c)] else gT ..= string.sub(t, i, i) end end; rLabel.Text = gT; task.wait(d) end end; rLabel.Text = t end; task.wait(3) end end)
   task.wait(); local rW = getTextWidth(rLabel.Text, rLabel.Font, rLabel.TextSize, styleConfig.TAG_SIZE.Y.Offset); local nW = getTextWidth(dNLabel.Text, dNLabel.Font, dNLabel.TextSize, styleConfig.TAG_SIZE.Y.Offset); local totalWidth = 8 + 30 + 8 + math.max(rW, nW) + 16
   tag.Size = UDim2.new(0, totalWidth, 0, styleConfig.TAG_SIZE.Y.Offset); tag.StudsOffset = styleConfig.TAG_OFFSET; local tBX = 8 + 30 + 8; rLabel.Position = UDim2.new(0, tBX, 0, 3); rLabel.Size = UDim2.new(0, rW, 0, 16); dNLabel.Position = UDim2.new(0, tBX, 0, 17); dNLabel.Size = UDim2.new(0, nW, 0, 16)
@@ -108,15 +132,15 @@ end
 local function createDcTag(character, player, rankName, rankData, styleConfig)
     local head = character and character:FindFirstChild("Head"); if not head then return end
     local tag = Instance.new("BillboardGui", Players.LocalPlayer.PlayerGui); tag.Name = "RankTag"; tag.Adornee = head; tag.MaxDistance = styleConfig.MAX_DISTANCE; tag.LightInfluence = 0; tag.ResetOnSpawn = false
-    tag.Active = true
-    tag.AlwaysOnTop = true
+    tag.Active = true; tag.AlwaysOnTop = true
 
     local mainFrame = Instance.new("TextButton", tag); mainFrame.Name = "MainFrame"; mainFrame.BackgroundColor3 = rankData.primary or Color3.fromRGB(30, 31, 34); mainFrame.ClipsDescendants = true; mainFrame.Size = UDim2.new(1,0,1,0); mainFrame.Text = ""; mainFrame.AutoButtonColor = false
     if player ~= Players.LocalPlayer then mainFrame.MouseButton1Click:Connect(function() teleportToPlayer(player) end) end
 
     local frameCorner = Instance.new("UICorner", mainFrame); frameCorner.CornerRadius = styleConfig.CORNER_RADIUS
     local nameplate = Instance.new("ImageLabel", mainFrame); nameplate.Name = "Nameplate"; nameplate.Size = UDim2.new(1, 0, 1, 0); nameplate.BackgroundTransparency = 1; nameplate.Image = rankData.nameplateImage or ""; nameplate.ImageTransparency = 0.5; nameplate.ZIndex = 1; nameplate.ScaleType = Enum.ScaleType.Stretch
-    
+    local nameplateCorner = Instance.new("UICorner", nameplate); nameplateCorner.CornerRadius = styleConfig.CORNER_RADIUS -- NEU: Runde Ecken für die Nameplate
+
     local pC = Instance.new("Frame", mainFrame); pC.Name = "ProfileContainer"; pC.Size = UDim2.new(0, 48, 0, 48); pC.Position = UDim2.new(0, 5, 0.5, -24); pC.BackgroundTransparency = 1; pC.ZIndex = 5
     local pIUrl = rankData.profileFrame; if not pIUrl or pIUrl == "" then local s, t = pcall(Players.GetUserThumbnailAsync, Players, player.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size48x48); if s and t then pIUrl = t end end
     if pIUrl then local p = Instance.new("ImageLabel", pC); p.Name = "ProfilePic"; p.Size = UDim2.new(0, 40, 0, 40); p.Position = UDim2.new(0.5, -20, 0.5, -20); p.Image = pIUrl; p.BackgroundTransparency = 1; p.ZIndex = 4; local c = Instance.new("UICorner", p); c.CornerRadius = UDim.new(1, 0) end
@@ -127,11 +151,16 @@ local function createDcTag(character, player, rankName, rankData, styleConfig)
         local aspectConstraint = Instance.new("UIAspectRatioConstraint", statusBg); aspectConstraint.AspectRatio = 1.0
         local statusIcon = Instance.new("ImageLabel", statusBg); statusIcon.Name = "StatusIcon"; statusIcon.Size = UDim2.new(1, -6, 1, -6); statusIcon.Position = UDim2.new(0.5, 0, 0.5, 0); statusIcon.AnchorPoint = Vector2.new(0.5, 0.5); statusIcon.Image = rankData.statusIcon; statusIcon.BackgroundTransparency = 1; statusIcon.ZIndex = 7
     end
-    local tC = Instance.new("Frame", mainFrame); tC.Name = "TextContainer"; tC.Position = UDim2.new(0, 60, 0, 0); tC.BackgroundTransparency = 1; tC.ZIndex = 4; local uLL = Instance.new("UIListLayout", tC); uLL.FillDirection = Enum.FillDirection.Vertical; uLL.VerticalAlignment = Enum.VerticalAlignment.Center; uLL.Padding = UDim.new(0, -2); uLL.SortOrder = Enum.SortOrder.LayoutOrder
+    local tC = Instance.new("Frame", mainFrame); tC.Name = "TextContainer"; tC.Position = UDim2.new(0, 60, 0, 0); tC.BackgroundTransparency = 1; tC.ZIndex = 4; 
+    local uLL = Instance.new("UIListLayout", tC); uLL.FillDirection = Enum.FillDirection.Vertical; uLL.VerticalAlignment = Enum.VerticalAlignment.Center; uLL.Padding = UDim.new(0, -2); uLL.SortOrder = Enum.SortOrder.LayoutOrder
     local rL = Instance.new("TextLabel", tC); rL.Name = "RankLabel"; rL.Font = Enum.Font.GothamBold; rL.Text = rankName; rL.TextSize = 18; rL.TextColor3 = rankData.accent or Color3.new(1,1,1); rL.BackgroundTransparency = 1; rL.TextXAlignment = Enum.TextXAlignment.Left; rL.Size = UDim2.new(1, -5, 0, 20); rL.LayoutOrder = 1
+    if rankData.rankFont and Enum.Font[rankData.rankFont] then rL.Font = Enum.Font[rankData.rankFont] end
+
     local pNL = Instance.new("TextLabel", tC); pNL.Name = "PlayerNameLabel"; pNL.Font = Enum.Font.Gotham; pNL.Text = player.DisplayName; pNL.TextSize = 12; pNL.TextColor3 = Color3.fromRGB(255, 255, 255); pNL.BackgroundTransparency = 1; pNL.TextXAlignment = Enum.TextXAlignment.Left; pNL.Size = UDim2.new(1, -5, 0, 15); pNL.LayoutOrder = 2
     task.wait(); local totalWidth = ((rankData.aspectRatio and rankData.aspectRatio > 0) and (styleConfig.TAG_HEIGHT * rankData.aspectRatio) or 220) * (styleConfig.WIDTH_MULTIPLIER or 1); local FULL_SIZE = UDim2.new(0, totalWidth, 0, styleConfig.TAG_HEIGHT)
-    tag.Size = FULL_SIZE; tag.StudsOffset = styleConfig.TAG_OFFSET; tC.Size = UDim2.new(1, -70, 1, -10)
+    tag.Size = FULL_SIZE; tag.StudsOffset = styleConfig.TAG_OFFSET; 
+    tC.Size = UDim2.new(1, -70, 1, 0) -- Angepasst: Mittiger
+
     local isMinimized = false; local MINI_SIZE = UDim2.new(0, 50, 0, 50)
     spawn(function() while tag and tag.Parent do local lPC = Players.LocalPlayer and Players.LocalPlayer.Character; if lPC and lPC:FindFirstChild("Head") and head and head.Parent then local dist = (lPC.Head.Position - head.Position).Magnitude; local tI = TweenInfo.new(0.3); if dist > (styleConfig.DISTANCE_THRESHOLD + styleConfig.HYSTERESIS) and not isMinimized then isMinimized = true; TweenService:Create(tag, tI, {Size = MINI_SIZE, StudsOffset = styleConfig.MINI_OFFSET}):Play(); TweenService:Create(frameCorner, tI, {CornerRadius = UDim.new(1, 0)}):Play(); TweenService:Create(nameplate, tI, {ImageTransparency = 1}):Play(); TweenService:Create(pC, tI, {Position = UDim2.new(0.5, -24, 0.5, -24)}):Play(); for _, c in ipairs(tC:GetChildren()) do if c:IsA("TextLabel") then TweenService:Create(c, tI, {TextTransparency = 1}):Play() end end elseif dist < (styleConfig.DISTANCE_THRESHOLD - styleConfig.HYSTERESIS) and isMinimized then isMinimized = false; TweenService:Create(tag, tI, {Size = FULL_SIZE, StudsOffset = styleConfig.TAG_OFFSET}):Play(); TweenService:Create(frameCorner, tI, {CornerRadius = styleConfig.CORNER_RADIUS}):Play(); TweenService:Create(nameplate, tI, {ImageTransparency = 0.5}):Play(); TweenService:Create(pC, tI, {Position = UDim2.new(0, 5, 0.5, -24)}):Play(); for _, c in ipairs(tC:GetChildren()) do if c:IsA("TextLabel") then TweenService:Create(c, tI, {TextTransparency = 0}):Play() end end end end; task.wait(0.2) end end)
 end
@@ -199,4 +228,3 @@ if localPlayer and not playerToTagInfo[localPlayer.Name:lower()] then
     task.spawn(applyPlayerTag, localPlayer)
     pcall(function() if TextChatService and TextChatService.TextChannels:FindFirstChild("RBXGeneral") then TextChatService.TextChannels.RBXGeneral:SendAsync("     ") end end)
 end
-
